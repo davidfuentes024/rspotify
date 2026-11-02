@@ -1,7 +1,7 @@
 mod util;
 
 use rspotify::{
-    model::{AlbumId, AlbumType, ArtistId, Country, Market, PlaylistId, TrackId},
+    model::{AlbumId, AlbumType, ArtistId, AudiobookId, Country, Market, PlaylistId, TrackId},
     prelude::*,
     ClientCredsSpotify,
 };
@@ -257,4 +257,31 @@ pub mod test_pagination {
 
         assert_eq!(names, SONG_NAMES);
     }
+}
+
+#[maybe_async::test(
+    feature = "__sync",
+    async(all(feature = "__async", not(target_arch = "wasm32")), tokio::test),
+    async(all(feature = "__async", target_arch = "wasm32"), wasm_bindgen_test)
+)]
+#[ignore = "Requires an app whose owner has an active premium subscription, and a market where audiobooks are available."]
+async fn test_audiobook() {
+    let spotify = creds_client().await;
+    let id = AudiobookId::from_id("1LereuzBIX0fs2sUPmW2kf").unwrap();
+    let market = Some(Market::Country(Country::Colombia));
+
+    let audiobook = spotify.get_an_audiobook(id.clone(), market).await.unwrap();
+    assert_eq!(audiobook.id, id);
+
+    let chapters = spotify
+        .get_audiobook_chapters_manual(id, market, Some(2), None)
+        .await
+        .unwrap();
+    assert_eq!(chapters.items.len(), 2);
+
+    let chapter = spotify
+        .get_a_chapter(chapters.items[0].id.clone(), market)
+        .await
+        .unwrap();
+    assert_eq!(chapter.id, chapters.items[0].id);
 }

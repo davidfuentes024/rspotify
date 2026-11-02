@@ -4,6 +4,7 @@
 pub mod album;
 pub mod artist;
 pub mod audio;
+pub mod audiobook;
 pub mod auth;
 pub mod category;
 pub mod context;
@@ -24,9 +25,9 @@ pub mod track;
 pub mod user;
 
 pub use {
-    album::*, artist::*, audio::*, auth::*, category::*, context::*, device::*, enums::*, error::*,
-    idtypes::*, image::*, offset::*, page::*, playing::*, playlist::*, recommend::*, search::*,
-    show::*, track::*, user::*,
+    album::*, artist::*, audio::*, audiobook::*, auth::*, category::*, context::*, device::*,
+    enums::*, error::*, idtypes::*, image::*, offset::*, page::*, playing::*, playlist::*,
+    recommend::*, search::*, show::*, track::*, user::*,
 };
 
 use serde::{Deserialize, Serialize};

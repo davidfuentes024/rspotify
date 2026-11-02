@@ -24,7 +24,7 @@ pub enum AlbumType {
     Compilation,
 }
 
-/// Type: `artist`, `album`, `track`, `playlist`, `show` or `episode`
+/// Type: `artist`, `album`, `track`, `playlist`, `show`, `episode`, `audiobook` or `chapter`
 #[derive(
     Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Display, EnumString, IntoStaticStr,
 )]
@@ -38,6 +38,8 @@ pub enum Type {
     User,
     Show,
     Episode,
+    Audiobook,
+    Chapter,
     Collection,
     Collectionyourepisodes, // rename to collectionyourepisodes
     // Fallback variant to capture unknown variants introduced by

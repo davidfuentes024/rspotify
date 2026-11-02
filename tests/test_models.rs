@@ -1834,3 +1834,250 @@ fn test_deserialization_playlist_item_with_malformed_episodes() {
     assert!(matches!(id, PlayableId::Episode(_)));
     assert_eq!(id.id(), "4IBGQd8aV4j6WGqGOjdJmE");
 }
+
+#[test]
+#[wasm_bindgen_test]
+fn test_full_audiobook() {
+    // Taken from a real `GET /audiobooks/{id}` response, with the text fields
+    // shortened.
+    let json_str = r#"
+{
+  "authors": [
+    {
+      "name": "J.K. Rowling"
+    }
+  ],
+  "chapters": {
+    "href": "https://api.spotify.com/v1/audiobooks/ID/chapters",
+    "items": [
+      {
+        "id": "5O9nqKKesDWqMk9VOIjVxb",
+        "description": "Test description.",
+        "chapter_number": 0,
+        "duration_ms": 1798217,
+        "images": [
+          {
+            "height": 640,
+            "width": 640,
+            "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602"
+          }
+        ],
+        "is_playable": false,
+        "languages": [
+          ""
+        ],
+        "name": "Track 1",
+        "release_date": "2019-02-21",
+        "release_date_precision": "day",
+        "explicit": false,
+        "html_description": "<p>Test description.</p>",
+        "type": "chapter",
+        "uri": "spotify:episode:5O9nqKKesDWqMk9VOIjVxb",
+        "external_urls": {
+          "spotify": "https://open.spotify.com/episode/5O9nqKKesDWqMk9VOIjVxb"
+        },
+        "restrictions": {
+          "reason": "payment_required"
+        },
+        "href": "https://api.spotify.com/v1/chapters/5O9nqKKesDWqMk9VOIjVxb"
+      }
+    ],
+    "limit": 1,
+    "next": null,
+    "offset": 0,
+    "previous": null,
+    "total": 18
+  },
+  "copyrights": [
+    {
+      "text": "J.K. Rowling 1997",
+      "type": "C"
+    }
+  ],
+  "description": "Test description.",
+  "edition": "Unabridged edition",
+  "explicit": false,
+  "external_urls": {
+    "spotify": "https://open.spotify.com/show/1LereuzBIX0fs2sUPmW2kf"
+  },
+  "href": "https://api.spotify.com/v1/audiobooks/1LereuzBIX0fs2sUPmW2kf?market=CO",
+  "html_description": "<p>Test description.</p>",
+  "id": "1LereuzBIX0fs2sUPmW2kf",
+  "images": [
+    {
+      "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602",
+      "height": 640,
+      "width": 640
+    }
+  ],
+  "is_playable": true,
+  "languages": [
+    "es"
+  ],
+  "media_type": "audio",
+  "name": "Harry Potter y la piedra filosofal",
+  "narrators": [
+    {
+      "name": "Carlos Ponce"
+    }
+  ],
+  "total_chapters": 18,
+  "type": "audiobook",
+  "uri": "spotify:show:1LereuzBIX0fs2sUPmW2kf"
+}
+"#;
+    let audiobook: FullAudiobook = deserialize(json_str);
+    assert_eq!(audiobook.id.id(), "1LereuzBIX0fs2sUPmW2kf");
+    assert_eq!(audiobook.authors[0].name, "J.K. Rowling");
+    assert_eq!(audiobook.total_chapters, Some(18));
+    assert_eq!(audiobook.chapters.items.len(), 1);
+
+    // Restricted chapters must not break the whole response.
+    let chapter = &audiobook.chapters.items[0];
+    assert_eq!(chapter.id.id(), "5O9nqKKesDWqMk9VOIjVxb");
+    assert_eq!(chapter.release_date_precision, DatePrecision::Day);
+    assert_eq!(
+        chapter.restrictions.as_ref().unwrap().reason,
+        RestrictionReason::PaymentRequired
+    );
+}
+
+#[test]
+#[wasm_bindgen_test]
+fn test_simplified_audiobook() {
+    // Search results omit `is_playable` and send `total_chapters` as `null`.
+    let json_str = r#"
+{
+  "authors": [
+    {
+      "name": "J.K. Rowling"
+    }
+  ],
+  "copyrights": [
+    {
+      "text": "J.K. Rowling 1997",
+      "type": "C"
+    }
+  ],
+  "description": "Test description.",
+  "html_description": "<p>Test description.</p>",
+  "edition": "Unabridged edition",
+  "explicit": false,
+  "external_urls": {
+    "spotify": "https://open.spotify.com/show/1LereuzBIX0fs2sUPmW2kf"
+  },
+  "href": "https://api.spotify.com/v1/audiobooks/1LereuzBIX0fs2sUPmW2kf",
+  "id": "1LereuzBIX0fs2sUPmW2kf",
+  "images": [
+    {
+      "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602",
+      "height": 640,
+      "width": 640
+    }
+  ],
+  "is_externally_hosted": false,
+  "languages": [
+    "es"
+  ],
+  "media_type": "audio",
+  "name": "Harry Potter y la piedra filosofal",
+  "narrators": [
+    {
+      "name": "Carlos Ponce"
+    }
+  ],
+  "type": "audiobook",
+  "uri": "spotify:show:1LereuzBIX0fs2sUPmW2kf",
+  "total_chapters": null
+}
+"#;
+    let audiobook: SimplifiedAudiobook = deserialize(json_str);
+    assert_eq!(audiobook.id.id(), "1LereuzBIX0fs2sUPmW2kf");
+    assert_eq!(audiobook.total_chapters, None);
+}
+
+#[test]
+#[wasm_bindgen_test]
+fn test_full_chapter() {
+    let json_str = r#"
+{
+  "restrictions": {
+    "reason": "payment_required"
+  },
+  "id": "5O9nqKKesDWqMk9VOIjVxb",
+  "description": "Test description.",
+  "chapter_number": 0,
+  "duration_ms": 1798217,
+  "explicit": false,
+  "images": [
+    {
+      "height": 640,
+      "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602",
+      "width": 640
+    }
+  ],
+  "languages": [
+    "es"
+  ],
+  "name": "Track 1",
+  "release_date": "2019-02-21",
+  "release_date_precision": "day",
+  "is_playable": false,
+  "html_description": "<p>Test description.</p>",
+  "audiobook": {
+    "authors": [
+      {
+        "name": "J.K. Rowling"
+      }
+    ],
+    "copyrights": [
+      {
+        "text": "J.K. Rowling 1997",
+        "type": "C"
+      }
+    ],
+    "description": "Test description.",
+    "edition": "Unabridged edition",
+    "explicit": false,
+    "external_urls": {
+      "spotify": "https://open.spotify.com/show/1LereuzBIX0fs2sUPmW2kf"
+    },
+    "href": "https://api.spotify.com/v1/audiobooks/1LereuzBIX0fs2sUPmW2kf",
+    "html_description": "<p>Test description.</p>",
+    "id": "1LereuzBIX0fs2sUPmW2kf",
+    "images": [
+      {
+        "height": 640,
+        "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602",
+        "width": 640
+      }
+    ],
+    "languages": [
+      "es"
+    ],
+    "media_type": "audio",
+    "name": "Harry Potter y la piedra filosofal",
+    "narrators": [
+      {
+        "name": "Carlos Ponce"
+      }
+    ],
+    "total_chapters": null,
+    "type": "audiobook",
+    "uri": "spotify:show:1LereuzBIX0fs2sUPmW2kf"
+  },
+  "type": "chapter",
+  "uri": "spotify:episode:5O9nqKKesDWqMk9VOIjVxb",
+  "external_urls": {
+    "spotify": "https://open.spotify.com/episode/5O9nqKKesDWqMk9VOIjVxb"
+  },
+  "href": "https://api.spotify.com/v1/chapters/5O9nqKKesDWqMk9VOIjVxb"
+}
+"#;
+    let chapter: FullChapter = deserialize(json_str);
+    assert_eq!(chapter.id.id(), "5O9nqKKesDWqMk9VOIjVxb");
+    assert_eq!(chapter.duration, Duration::milliseconds(1798217));
+    // The nested audiobook also comes with a `null` `total_chapters`.
+    assert_eq!(chapter.audiobook.total_chapters, None);
+    assert!(chapter.resume_point.is_none());
+}

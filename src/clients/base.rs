@@ -806,6 +806,103 @@ where
         convert_result::<EpisodesPayload>(&result).map(|x| x.episodes)
     }
 
+    /// Get Spotify catalog information for a single audiobook identified by
+    /// its unique Spotify ID.
+    ///
+    /// Path Parameters
+    /// - id: The Spotify ID for the audiobook.
+    ///
+    /// Query Parameters
+    /// - market: Optional. An ISO 3166-1 alpha-2 country code or the string from_token.
+    ///
+    /// Note that the "several audiobooks" endpoint is not supported, as Spotify
+    /// has removed it.
+    ///
+    /// [Reference](https://developer.spotify.com/documentation/web-api/reference/get-an-audiobook)
+    async fn get_an_audiobook(
+        &self,
+        id: AudiobookId<'_>,
+        market: Option<Market>,
+    ) -> ClientResult<FullAudiobook> {
+        let url = format!("audiobooks/{}", id.id());
+        let params = build_map([("market", market.map(Into::into))]);
+
+        let result = self.api_get(&url, &params).await?;
+        convert_result(&result)
+    }
+
+    /// Get Spotify catalog information about an audiobook's chapters.
+    ///
+    /// Path Parameters
+    /// - id: The Spotify ID for the audiobook.
+    ///
+    /// Query Parameters
+    /// - market: Optional. An ISO 3166-1 alpha-2 country code or the string from_token.
+    ///
+    /// See [`Self::get_audiobook_chapters_manual`] for a manually paginated
+    /// version of this.
+    ///
+    /// [Reference](https://developer.spotify.com/documentation/web-api/reference/get-audiobook-chapters)
+    fn get_audiobook_chapters<'b, 'a: 'b>(
+        &'a self,
+        id: AudiobookId<'a>,
+        market: Option<Market>,
+    ) -> Paginator<'b, ClientResult<SimplifiedChapter>> {
+        paginate_with_ctx(
+            (self, id),
+            move |(slf, id), limit, offset| {
+                slf.get_audiobook_chapters_manual(id.as_ref(), market, Some(limit), Some(offset))
+            },
+            self.get_config().pagination_chunks,
+        )
+    }
+
+    /// The manually paginated version of [`Self::get_audiobook_chapters`].
+    async fn get_audiobook_chapters_manual(
+        &self,
+        id: AudiobookId<'_>,
+        market: Option<Market>,
+        limit: Option<u32>,
+        offset: Option<u32>,
+    ) -> ClientResult<Page<SimplifiedChapter>> {
+        let limit = limit.map(|x| x.to_string());
+        let offset = offset.map(|x| x.to_string());
+        let params = build_map([
+            ("market", market.map(Into::into)),
+            ("limit", limit.as_deref()),
+            ("offset", offset.as_deref()),
+        ]);
+
+        let url = format!("audiobooks/{}/chapters", id.id());
+        let result = self.api_get(&url, &params).await?;
+        convert_result(&result)
+    }
+
+    /// Get Spotify catalog information for a single audiobook chapter
+    /// identified by its unique Spotify ID.
+    ///
+    /// Path Parameters
+    /// - id: The Spotify ID for the chapter.
+    ///
+    /// Query Parameters
+    /// - market: Optional. An ISO 3166-1 alpha-2 country code or the string from_token.
+    ///
+    /// Note that the "several chapters" endpoint is not supported, as Spotify
+    /// has removed it.
+    ///
+    /// [Reference](https://developer.spotify.com/documentation/web-api/reference/get-a-chapter)
+    async fn get_a_chapter(
+        &self,
+        id: ChapterId<'_>,
+        market: Option<Market>,
+    ) -> ClientResult<FullChapter> {
+        let url = format!("chapters/{}", id.id());
+        let params = build_map([("market", market.map(Into::into))]);
+
+        let result = self.api_get(&url, &params).await?;
+        convert_result(&result)
+    }
+
     /// Get audio features for a track
     ///
     /// Parameters:

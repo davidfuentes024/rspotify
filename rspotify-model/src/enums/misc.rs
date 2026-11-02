@@ -61,7 +61,8 @@ pub enum DatePrecision {
     Day,
 }
 
-/// The reason for the restriction: `market`, `product`, `explicit`
+/// The reason for the restriction: `market`, `product`, `explicit` or
+/// `payment_required`
 #[derive(Clone, Serialize, Deserialize, Copy, PartialEq, Eq, Debug, IntoStaticStr)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
@@ -69,6 +70,7 @@ pub enum RestrictionReason {
     Market,
     Product,
     Explicit,
+    PaymentRequired,
 }
 
 /// Indicates the modality (major or minor) of a track.

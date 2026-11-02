@@ -1,5 +1,9 @@
 ## Unreleased
 
+**New features**
+- Add audiobook support: `AudiobookId`, `ChapterId`, the audiobook and chapter models, and the `get_an_audiobook`, `get_audiobook_chapters` and `get_a_chapter` endpoints.
+- Add `RestrictionReason::PaymentRequired`, returned for restricted audiobook chapters.
+
 **Bugfixes**
 - Fix: deserialize `null` `is_externally_hosted` in `SimplifiedEpisode` and `FullEpisode` as `false` instead of failing the whole response
 

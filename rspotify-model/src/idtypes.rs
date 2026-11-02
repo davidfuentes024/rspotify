@@ -15,6 +15,8 @@
 //! * [`Type::User`] => [`UserId`]
 //! * [`Type::Show`] => [`ShowId`]
 //! * [`Type::Episode`] => [`EpisodeId`]
+//! * [`Type::Audiobook`] => [`AudiobookId`]
+//! * [`Type::Chapter`] => [`ChapterId`]
 //!
 //! Every kind of ID defines its own validity function, i.e., what characters it
 //! can be made up of, such as alphanumeric or any.
@@ -466,6 +468,14 @@ define_idtypes!(
     },
     Episode => {
         name: EpisodeId,
+        validity: |id| id.chars().all(|ch| ch.is_ascii_alphanumeric())
+    },
+    Audiobook => {
+        name: AudiobookId,
+        validity: |id| id.chars().all(|ch| ch.is_ascii_alphanumeric())
+    },
+    Chapter => {
+        name: ChapterId,
         validity: |id| id.chars().all(|ch| ch.is_ascii_alphanumeric())
     },
     User => {
