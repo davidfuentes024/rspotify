@@ -76,6 +76,9 @@ fn test_current_playing_type() {
 fn test_search_type() {
     let episode = SearchType::Episode;
     assert_eq!(<&str>::from(episode), "episode");
+
+    let audiobook = SearchType::Audiobook;
+    assert_eq!(<&str>::from(audiobook), "audiobook");
 }
 
 #[test]

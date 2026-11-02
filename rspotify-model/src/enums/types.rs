@@ -81,6 +81,7 @@ pub enum SearchType {
     Playlist,
     Show,
     Episode,
+    Audiobook,
 }
 
 /// The user's Spotify subscription level: `premium`, `free`

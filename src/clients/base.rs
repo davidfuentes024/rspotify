@@ -447,7 +447,7 @@ where
     /// - limit  - the number of items to return
     /// - offset - the index of the first item to return
     /// - type - the type of item to return. One of 'artist', 'album', 'track',
-    ///  'playlist', 'show' or 'episode'
+    ///  'playlist', 'show', 'episode' or 'audiobook'
     /// - market - An ISO 3166-1 alpha-2 country code or the string from_token.
     /// - include_external: Optional.Possible values: audio. If
     ///   include_external=audio is specified the response will include any
@@ -497,7 +497,7 @@ where
     /// - limit  - the number of items to return
     /// - offset - the index of the first item to return
     /// - type - the type of item to return. Multiple of 'artist', 'album', 'track',
-    ///  'playlist', 'show' or 'episode'
+    ///  'playlist', 'show', 'episode' or 'audiobook'
     /// - market - An ISO 3166-1 alpha-2 country code or the string from_token.
     /// - include_external: Optional.Possible values: audio. If
     ///   include_external=audio is specified the response will include any

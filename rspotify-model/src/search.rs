@@ -3,8 +3,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    FullArtist, FullTrack, Page, SimplifiedAlbum, SimplifiedEpisode, SimplifiedPlaylist,
-    SimplifiedShow,
+    FullArtist, FullTrack, Page, SimplifiedAlbum, SimplifiedAudiobook, SimplifiedEpisode,
+    SimplifiedPlaylist, SimplifiedShow,
 };
 
 /// Search for playlists
@@ -44,6 +44,12 @@ pub struct SearchEpisodes {
     pub episodes: Page<SimplifiedEpisode>,
 }
 
+/// Search for audiobooks
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SearchAudiobooks {
+    pub audiobooks: Page<SimplifiedAudiobook>,
+}
+
 /// Search result of any kind
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SearchResult {
@@ -59,6 +65,8 @@ pub enum SearchResult {
     Shows(Page<SimplifiedShow>),
     #[serde(rename = "episodes")]
     Episodes(Page<SimplifiedEpisode>),
+    #[serde(rename = "audiobooks")]
+    Audiobooks(Page<SimplifiedAudiobook>),
 }
 
 /// Search result of any multiple kinds
@@ -70,4 +78,5 @@ pub struct SearchMultipleResult {
     pub tracks: Option<Page<FullTrack>>,
     pub shows: Option<Page<SimplifiedShow>>,
     pub episodes: Option<Page<SimplifiedEpisode>>,
+    pub audiobooks: Option<Page<SimplifiedAudiobook>>,
 }

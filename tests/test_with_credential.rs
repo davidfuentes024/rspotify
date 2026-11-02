@@ -8,7 +8,7 @@ use rspotify::{
 
 use maybe_async::maybe_async;
 
-use rspotify_model::SearchType;
+use rspotify_model::{SearchResult, SearchType};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_test::*;
 
@@ -284,4 +284,27 @@ async fn test_audiobook() {
         .await
         .unwrap();
     assert_eq!(chapter.id, chapters.items[0].id);
+}
+
+#[maybe_async::test(
+    feature = "__sync",
+    async(all(feature = "__async", not(target_arch = "wasm32")), tokio::test),
+    async(all(feature = "__async", target_arch = "wasm32"), wasm_bindgen_test)
+)]
+#[ignore = "Requires an app whose owner has an active premium subscription, and a market where audiobooks are available."]
+async fn test_search_audiobook() {
+    let market = Some(Market::Country(Country::Colombia));
+    let result = creds_client()
+        .await
+        .search(
+            "harry potter",
+            SearchType::Audiobook,
+            market,
+            None,
+            Some(5),
+            None,
+        )
+        .await
+        .unwrap();
+    assert!(matches!(result, SearchResult::Audiobooks(_)));
 }

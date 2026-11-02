@@ -2081,3 +2081,80 @@ fn test_full_chapter() {
     assert_eq!(chapter.audiobook.total_chapters, None);
     assert!(chapter.resume_point.is_none());
 }
+
+#[test]
+#[wasm_bindgen_test]
+fn test_search_audiobooks() {
+    // Taken from a real `GET /search?type=audiobook` response, with the text
+    // fields shortened.
+    let json_str = r#"
+{
+  "audiobooks": {
+    "href": "https://api.spotify.com/v1/search?type=audiobook",
+    "limit": 1,
+    "next": null,
+    "offset": 0,
+    "previous": null,
+    "total": 2,
+    "items": [
+      {
+        "authors": [
+          {
+            "name": "J.K. Rowling"
+          }
+        ],
+        "copyrights": [
+          {
+            "text": "J.K. Rowling 1997",
+            "type": "C"
+          }
+        ],
+        "description": "Test description.",
+        "html_description": "<p>Test description.</p>",
+        "edition": "Unabridged edition",
+        "explicit": false,
+        "external_urls": {
+          "spotify": "https://open.spotify.com/show/1LereuzBIX0fs2sUPmW2kf"
+        },
+        "href": "https://api.spotify.com/v1/audiobooks/1LereuzBIX0fs2sUPmW2kf",
+        "id": "1LereuzBIX0fs2sUPmW2kf",
+        "images": [
+          {
+            "url": "https://i.scdn.co/image/ab676663000022a8d27f1360a3eba8f80543f602",
+            "height": 640,
+            "width": 640
+          }
+        ],
+        "is_externally_hosted": false,
+        "languages": [
+          "es"
+        ],
+        "media_type": "audio",
+        "name": "Harry Potter y la piedra filosofal",
+        "narrators": [
+          {
+            "name": "Carlos Ponce"
+          }
+        ],
+        "type": "audiobook",
+        "uri": "spotify:show:1LereuzBIX0fs2sUPmW2kf",
+        "total_chapters": 18
+      }
+    ]
+  }
+}
+"#;
+    let result: SearchResult = deserialize(json_str);
+    let page = match result {
+        SearchResult::Audiobooks(page) => page,
+        _ => panic!("expected audiobooks"),
+    };
+    assert_eq!(page.items.len(), 1);
+    // This response was made with a user token, which includes the chapter
+    // count. With client credentials it is `null`, see `test_simplified_audiobook`.
+    assert_eq!(page.items[0].total_chapters, Some(18));
+
+    let multiple: SearchMultipleResult = deserialize(json_str);
+    assert!(multiple.shows.is_none());
+    assert_eq!(multiple.audiobooks.unwrap().items.len(), 1);
+}
